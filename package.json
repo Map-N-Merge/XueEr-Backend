@@ -20,6 +20,7 @@
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
+    "check": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm build",
     "prepare": "husky"
   },
   "keywords": ["express", "typescript", "firebase", "api"],

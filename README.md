@@ -160,6 +160,8 @@ To enable Realtime Database, uncomment the relevant lines in:
 - `pnpm lint:fix` - Fix ESLint issues
 - `pnpm format` - Format with Prettier
 - `pnpm format:check` - Check Prettier formatting
+- `pnpm check` - Run all quality checks (CI equivalent)
+- `pnpm setup:test` - Setup test environment with dummy credentials
 
 ## 🔒 Security Features
 
@@ -167,6 +169,39 @@ To enable Realtime Database, uncomment the relevant lines in:
 - **CORS**: Cross-origin resource sharing
 - **Environment Validation**: Zod schema validation
 - **Request Logging**: Structured logging with Pino
+
+## 🚀 CI/CD
+
+### GitHub Actions
+
+本專案使用 GitHub Actions 進行持續整合：
+
+#### 基本 CI 工作流程 (`ci.yml`)
+
+- ✅ TypeScript 類型檢查
+- ✅ ESLint 代碼檢查
+- ✅ Prettier 格式檢查
+- ✅ 專案構建
+- ⏸️ 測試 (暫時停用，需要環境變數配置)
+
+#### 測試工作流程 (`test.yml`)
+
+- 🔧 手動觸發或配置 Firebase 環境變數後啟用
+- 包含完整的 API 測試和覆蓋率報告
+- 需要設置 GitHub Secrets 或使用測試用環境變數
+
+#### 啟用完整測試
+
+1. **使用測試環境變數** (推薦用於開發)：
+   - 修改 `.github/workflows/test.yml`
+   - 取消註解 `push` 和 `pull_request` 觸發器
+
+2. **使用真實 Firebase 配置**：
+   - 在 GitHub Repository Settings > Secrets 中設置：
+     - `FIREBASE_PROJECT_ID`
+     - `FIREBASE_PRIVATE_KEY`
+     - `FIREBASE_CLIENT_EMAIL`
+     - 等其他必要變數
 
 ## 🤝 Contributing
 
