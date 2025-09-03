@@ -15,7 +15,7 @@ const startServer = (): void => {
 			);
 
 			logger.info(`🚀 Server is running on http://localhost:${config.server.port}`);
-			logger.info(`📄 API Documentation: http://localhost:${config.server.port}/health`);
+			logger.info(`📄 API health check: http://localhost:${config.server.port}/health`);
 		});
 
 		// Graceful shutdown
