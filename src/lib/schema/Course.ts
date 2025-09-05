@@ -8,9 +8,9 @@ export const CourseSchema = z.object({
 	course_classroom: z.string().min(0).max(16).describe('Classroom location'), // can be empty "" string
 	course_year: z.number().describe('Academic year'),
 	course_semester: z.number().describe('Semester'),
-	course_credit: z.number().describe('Course credit'), 
+	course_credit: z.number().describe('Course credit'),
 	course_number: z.string().min(1).max(16).describe('Course number').optional(),
-	course_name_zh: z.string().min(1).max(32).describe('Course name in Chinese').optional(), 
+	course_name_zh: z.string().min(1).max(32).describe('Course name in Chinese').optional(),
 	course_name_en: z.string().min(1).max(128).describe('Course name in English').optional(),
 	course_provider: z.array(z.string().min(1).max(64)).describe('Course provider').optional(),
 	course_department: z.string().min(1).max(32).describe('Course department'),
