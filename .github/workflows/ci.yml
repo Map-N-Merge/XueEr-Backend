@@ -10,41 +10,41 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+      - name: Setup Go
+        uses: actions/setup-go@v4
         with:
-          version: latest
+          go-version: '1.21'
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: Cache Go modules
+        uses: actions/cache@v3
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Type check
-        run: pnpm typecheck
-
-      - name: Lint
-        run: pnpm lint
+      - name: Download dependencies
+        run: go mod download
 
       - name: Format check
-        run: pnpm format:check
+        run: |
+          go fmt ./...
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "Code is not formatted. Please run 'go fmt ./...'"
+            exit 1
+          fi
+
+      - name: Vet check
+        run: go vet ./...
 
       - name: Build
-        run: pnpm build
+        run: go build -o bin/main src/main.go
 
       # TODO: 暫時停用測試，因為需要 Firebase 環境變數配置
       # 在正式部署前需要設置 GitHub Secrets 或使用 Firebase 模擬器
       # - name: Run tests
-      #   run: pnpm test:run
+      #   run: go test ./...
