@@ -16,53 +16,37 @@ jobs:
   test-with-env:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+      - name: Setup Go
+        uses: actions/setup-go@v4
         with:
-          version: latest
+          go-version: '1.21'
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: Cache Go modules
+        uses: actions/cache@v3
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Download dependencies
+        run: go mod download
 
       # 設置測試用的環境變數
       - name: Create test environment file
         run: |
           echo "PORT=3000" > .env
-          echo "NODE_ENV=test" >> .env
           echo "FIREBASE_PROJECT_ID=test-project" >> .env
-          echo "FIREBASE_PRIVATE_KEY_ID=test-key-id" >> .env
-          echo 'FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\ntest-key\n-----END PRIVATE KEY-----"' >> .env
-          echo "FIREBASE_CLIENT_EMAIL=test@test.iam.gserviceaccount.com" >> .env
-          echo "FIREBASE_CLIENT_ID=test-client-id" >> .env
-          echo "FIREBASE_AUTH_URI=https://accounts.google.com/o/oauth2/auth" >> .env
-          echo "FIREBASE_TOKEN_URI=https://oauth2.googleapis.com/token" >> .env
-          echo "FIREBASE_AUTH_PROVIDER_X509_CERT_URL=https://www.googleapis.com/oauth2/v1/certs" >> .env
-          echo "FIREBASE_CLIENT_X509_CERT_URL=https://www.googleapis.com/robot/v1/metadata/x509/test%40test.iam.gserviceaccount.com" >> .env
           echo "CORS_ORIGINS=http://localhost:3000" >> .env
 
       - name: Run tests
-        run: pnpm test:run
+        run: go test ./...
 
-      - name: Run tests with coverage
-        run: pnpm test:coverage
-
-      # 上傳覆蓋率報告（可選）
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        if: success()
-        with:
-          fail_ci_if_error: false
+      # TODO: Add coverage reporting for Go
+      # - name: Run tests with coverage
+      #   run: go test -coverprofile=coverage.out ./...
+      #   run: go tool cover -html=coverage.out -o coverage.html
