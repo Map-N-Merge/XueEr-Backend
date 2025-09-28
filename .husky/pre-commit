@@ -1,7 +1,1 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-# Go code quality checks
-go fmt ./...
-go vet ./...
-go mod tidy
+pnpm lint-staged
