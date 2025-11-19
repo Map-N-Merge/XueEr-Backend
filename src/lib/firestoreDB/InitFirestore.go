@@ -10,9 +10,9 @@ import (
 )
 
 var FirestoreClient *firestore.Client // export this
-func InitFirestore() {
+func InitFirestore(credentialsPath string) {
 	ctx := context.Background()
-	sa := option.WithCredentialsFile("xueer-dev.json")
+	sa := option.WithCredentialsFile(credentialsPath)
 	app, err := firebase.NewApp(ctx, nil, sa)
 	if err != nil {
 		log.Fatalln(err)

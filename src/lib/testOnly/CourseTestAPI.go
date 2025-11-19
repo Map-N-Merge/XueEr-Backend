@@ -10,9 +10,21 @@ import (
 
 	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 func AddCourseHandler(c *gin.Context) {
+	// read APP_ENV from .env file and don't read from system environment variables
+	config, err := godotenv.Read()
+	if err != nil {
+		panic("Error loading .env file")
+	}
+	env := config["APP_ENV"]
+	if env != "test" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "This endpoint is only available in test environment"})
+		return
+	}
+
 	var courses []schema.Course
 	if err := c.ShouldBindJSON(&courses); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -53,6 +65,16 @@ func AddCourseHandler(c *gin.Context) {
 }
 
 func EditCourseHandler(c *gin.Context) {
+	// read APP_ENV from .env file and don't read from system environment variables
+	config, err := godotenv.Read()
+	if err != nil {
+		panic("Error loading .env file")
+	}
+	env := config["APP_ENV"]
+	if env != "test" {
+		c.JSON(http.StatusForbidden, gin.H{"error": "This endpoint is only available in test environment"})
+		return
+	}
 	courseID := c.Param("id") // get course's firebase ID from URL
 	if courseID == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Course ID is required"})

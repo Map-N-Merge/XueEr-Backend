@@ -106,14 +106,18 @@ go vet ./...
 
 These endpoints are commented out in production:
 
-- **POST** `/add-course` - Add multiple courses
-- **PATCH** `/edit-course/:id` - Update a course partially
+- **POST** `/courses` - Add multiple courses
+- **PATCH** `/course/:id` - Update a course partially
 
 ## 🔐 Environment Variables
 
 - `PORT`: Server port (default: 3000)
+- `APP_ENV`: Application environment (default: `test`)
+- `FIRESTORE_EMULATOR`: Firestore emulator flag (default: `true`)
 - `CORS_ORIGINS`: Allowed CORS origins (comma-separated, default: `localhost:3000,localhost:5173`)
 - `FIREBASE_CREDENTIALS_PATH`: Path to Firebase service account JSON file (default: `credentials/firebase-credentials.json`)
+- `FIREBASE_PROJECT_ID`: Firebase project ID (for development)
+- `FIRESTORE_EMULATOR_HOST`: Firestore emulator host (for development, e.g., `localhost:8081`, if using emulator)
 
 ## 🚀 Firebase Setup
 
@@ -134,12 +138,19 @@ client := firestoreDB.FirestoreClient
 ```
 
 ### Firestore Emulator (Development)
+When you want to start using the Firestore emulator for local development, you will need to set the `firebase.json` and the following environment variable:
 
-To use Firestore emulator, uncomment the line in `main.go`:
+- `FIRESTORE_EMULATOR`
+  - set to `true`
+- `FIRESTORE_EMULATOR_HOST`
+  - set to `localhost:8081` (or your configured host and port in `firebase.json`)
 
-```go
-testOnly.InitFirestoreEmulator()
+Then start the emulator with:
+
+```bash
+firebase emulators:start --project your-project-id
 ```
+The `your-project-id` should match the `FIREBASE_PROJECT_ID` in your `.env` file.
 
 ## 📝 Project Structure
 

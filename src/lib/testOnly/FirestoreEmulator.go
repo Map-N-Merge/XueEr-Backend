@@ -7,15 +7,20 @@ import (
 	"os"
 
 	firebase "firebase.google.com/go/v4"
+	"github.com/joho/godotenv"
 	"google.golang.org/api/option"
 )
 
 func InitFirestoreEmulator() {
-	os.Setenv("FIRESTORE_EMULATOR_HOST", "localhost:8081")
+	config, err := godotenv.Read()
+	if err != nil {
+		panic("Error loading .env file")
+	}
+	os.Setenv("FIRESTORE_EMULATOR_HOST", config["FIRESTORE_EMULATOR_HOST"])
 	ctx := context.Background()
-	print(os.Getenv("FIREBASE_PROJECT_ID"))
+	log.Println(config["FIREBASE_PROJECT_ID"])
 	app, err := firebase.NewApp(ctx, &firebase.Config{
-		ProjectID: os.Getenv("FIREBASE_PROJECT_ID"),
+		ProjectID: config["FIREBASE_PROJECT_ID"],
 	}, option.WithoutAuthentication())
 	if err != nil {
 		log.Fatalf("error initializing app: %v\n", err)
