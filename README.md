@@ -34,11 +34,14 @@ go mod tidy
 3. Set up environment variables:
 
 ```bash
-cp xueer-dev.example.json xueer-dev.json
 cp .env.example .env
 ```
 
-4. Configure your Firebase service account credentials in `xueer-dev.json`
+4. Configure your Firebase service account credentials in `credentials/`
+  1. You can download credentials from the GCP Console.(`IAM & Admin -> Service Accounts -> <Your Service Account> -> Keys -> Add Key -> Create New Key -> JSON`)
+  2. Then place the downloaded JSON file in the `credentials/` directory.
+  3. Change the path in `.env` if necessary.(default is `credentials/firebase-credentials.json`)
+  
 
 ## 🔧 Development
 
@@ -108,18 +111,17 @@ These endpoints are commented out in production:
 
 ## 🔐 Environment Variables
 
-Copy `xueer-dev.example.json` to `xueer-dev.json` and configure:
-
 - `PORT`: Server port (default: 3000)
-- `CORS_ORIGINS`: Allowed CORS origins (comma-separated, default: localhost:3000,localhost:5173)
-- Firebase service account JSON file with all required fields
+- `CORS_ORIGINS`: Allowed CORS origins (comma-separated, default: `localhost:3000,localhost:5173`)
+- `FIREBASE_CREDENTIALS_PATH`: Path to Firebase service account JSON file (default: `credentials/firebase-credentials.json`)
 
 ## 🚀 Firebase Setup
 
 1. Create a Firebase project
 2. Generate a service account key
 3. Download the JSON file
-4. Save as `xueer-dev.json` in the backend root
+4. Place it in the `credentials/` directory
+5. Update the `FIREBASE_CREDENTIALS_PATH` in `.env` if necessary
 
 ### Firestore Usage
 
@@ -158,9 +160,10 @@ backend/
 │   │       └── firestoreEmulator.go
 │   └── utils/
 │       └── logger.ts
+├── credentials/               # Firebase credentials (gitignored)
+│   └── firebase-credentials.json # Firebase service account
 ├── go.mod                      # Go dependencies
 ├── go.sum                      # Dependency checksums
-├── xueer-dev.example.json      # Environment template
 └── README.md
 ```
 
