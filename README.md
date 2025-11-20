@@ -1,23 +1,19 @@
 # XueEr Backend
 
-A modern Express.js backend with TypeScript, Firebase, and comprehensive development tooling.
+A modern Go backend with Gin framework, Firebase Firestore, and comprehensive API development.
 
 ## 🚀 Tech Stack
 
-- **Framework**: Express.js + TypeScript (Strict Mode)
-- **Database**: Firebase Admin SDK (Firestore + Realtime Database)
-- **Environment**: dotenv + Zod validation
-- **Code Quality**: ESLint, Prettier, EditorConfig
-- **Git Hooks**: Husky + lint-staged
-- **Development**: tsx (watch mode)
-- **Logging**: Pino
-- **Security**: Helmet + CORS
-- **CI/CD**: GitHub Actions (Node 20 + pnpm)
+- **Framework**: Gin (Go web framework)
+- **Database**: Firebase Admin SDK (Firestore)
+- **Environment**: godotenv
+- **Code Quality**: go fmt, go vet
+- **Development**: Hot reload with air (optional)
+- **Security**: CORS middleware + secure headers
 
 ## 📋 Prerequisites
 
-- Node.js >= 20.0.0
-- pnpm (recommended package manager)
+- Go >= 1.19
 - Firebase project with service account credentials
 
 ## 🛠️ Installation
@@ -26,13 +22,13 @@ A modern Express.js backend with TypeScript, Firebase, and comprehensive develop
 
 ```bash
 git clone <your-repo-url>
-cd XueEr-Backend
+cd XueEr/backend
 ```
 
 2. Install dependencies:
 
 ```bash
-pnpm install
+go mod tidy
 ```
 
 3. Set up environment variables:
@@ -41,167 +37,172 @@ pnpm install
 cp .env.example .env
 ```
 
-4. Configure your Firebase service account credentials in `.env`
-
-5. Initialize Git hooks:
-
-```bash
-pnpm prepare
-```
+4. Configure your Firebase service account credentials in `credentials/`
+  1. You can download credentials from the GCP Console.(`IAM & Admin -> Service Accounts -> <Your Service Account> -> Keys -> Add Key -> Create New Key -> JSON`)
+  2. Then place the downloaded JSON file in the `credentials/` directory.
+  3. Change the path in `.env` if necessary.(default is `credentials/firebase-credentials.json`)
+  
 
 ## 🔧 Development
 
-Start the development server with hot reload:
+Start Firestore emulator (optional):
 
 ```bash
-pnpm dev
+firebase emulators:start
+```
+
+Start the development server:
+
+```bash
+go run src/main.go
 ```
 
 The server will start on `http://localhost:3000` by default.
 
 ## 🧪 Testing
 
-Run tests with Vitest:
-
-```bash
-pnpm test          # Watch mode
-pnpm test:run      # Run once
-pnpm test:coverage # With coverage
-pnpm test:ui       # UI interface
-```
-
-See [TESTING.md](TESTING.md) for detailed testing guide.
+Not implemented yet.
 
 ## 🏗️ Build & Production
 
 Build the project:
 
 ```bash
-pnpm build
+go build -o bin/main src/main.go
 ```
 
 Start the production server:
 
 ```bash
-pnpm start
+./bin/main
 ```
 
 ## 🧪 Code Quality
 
-Run type checking:
+Format Go code:
 
 ```bash
-pnpm typecheck
+go fmt ./...
 ```
 
-Run linting:
+Check for issues:
 
 ```bash
-pnpm lint
-pnpm lint:fix  # Auto-fix issues
-```
-
-Run formatting:
-
-```bash
-pnpm format
-pnpm format:check  # Check formatting
+go vet ./...
 ```
 
 ## 📡 API Endpoints
 
-### Health Check
 
-- **GET** `/health` - Server health status
+### Courses
 
-### Test Endpoint
+- **GET** `/courses` - Get courses with pagination and sorting
+  - Query params:
+    - `page`: Page number (default: 1)
+    - `pageSize`: Items per page (default: 10)
+    - `sort`: Sort field (e.g., `CourseYear:desc`, `CourseNameZh:asc`)
 
-- **GET** `/api/test` - Test API and Firebase connection
+### Test Endpoints (Development Only)
+
+These endpoints are commented out in production:
+
+- **POST** `/courses` - Add multiple courses
+- **PATCH** `/course/:id` - Update a course partially
 
 ## 🔐 Environment Variables
 
-Copy `.env.example` to `.env` and configure:
-
 - `PORT`: Server port (default: 3000)
-- `NODE_ENV`: Environment (development/production/test)
-- `FIREBASE_*`: Firebase service account credentials
-- `CORS_ORIGINS`: Allowed CORS origins
+- `APP_ENV`: Application environment (default: `test`)
+- `FIRESTORE_EMULATOR`: Firestore emulator flag (default: `true`)
+- `CORS_ORIGINS`: Allowed CORS origins (comma-separated, default: `localhost:3000,localhost:5173`)
+- `FIREBASE_CREDENTIALS_PATH`: Path to Firebase service account JSON file (default: `credentials/firebase-credentials.json`)
+- `FIREBASE_PROJECT_ID`: Firebase project ID (for development)
+- `FIRESTORE_EMULATOR_HOST`: Firestore emulator host (for development, e.g., `localhost:8081`, if using emulator)
 
 ## 🚀 Firebase Setup
 
 1. Create a Firebase project
 2. Generate a service account key
 3. Download the JSON file
-4. Extract the credentials to your `.env` file
+4. Place it in the `credentials/` directory
+5. Update the `FIREBASE_CREDENTIALS_PATH` in `.env` if necessary
 
 ### Firestore Usage
 
-The project is configured with Firestore by default. Access it via:
+Access Firestore in Go:
 
-```typescript
-import { firestore } from './config/firebase';
+```go
+import "XueEr-backend/src/lib/firestoreDB"
+
+client := firestoreDB.FirestoreClient
 ```
 
-### Realtime Database (Optional)
+### Firestore Emulator (Development)
+When you want to start using the Firestore emulator for local development, you will need to set the `firebase.json` and the following environment variable:
 
-To enable Realtime Database, uncomment the relevant lines in:
+- `FIRESTORE_EMULATOR`
+  - set to `true`
+- `FIRESTORE_EMULATOR_HOST`
+  - set to `localhost:8081` (or your configured host and port in `firebase.json`)
 
-- `src/config/firebase.ts`
-- Add database URL to `.env`
+Then start the emulator with:
 
-## 📝 Scripts
+```bash
+firebase emulators:start --project your-project-id
+```
+The `your-project-id` should match the `FIREBASE_PROJECT_ID` in your `.env` file.
 
-- `pnpm dev` - Start development server
-- `pnpm build` - Build for production
-- `pnpm start` - Start production server
-- `pnpm clean` - Clean build directory
-- `pnpm typecheck` - Run TypeScript checks
-- `pnpm lint` - Run ESLint
-- `pnpm lint:fix` - Fix ESLint issues
-- `pnpm format` - Format with Prettier
-- `pnpm format:check` - Check Prettier formatting
-- `pnpm check` - Run all quality checks (CI equivalent)
-- `pnpm setup:test` - Setup test environment with dummy credentials
+## 📝 Project Structure
+
+```
+backend/
+├── src/
+│   ├── main.go                 # Server entry point
+│   ├── lib/
+│   │   ├── courses/
+│   │   │   └── ReadCourses.go  # GET /courses handler
+│   │   ├── firestoreDB/
+│   │   │   └── InitFirestore.go # Firebase initialization
+│   │   ├── schema/
+│   │   │   ├── Course.go       # Course data structures
+│   │   │   └── ClassSchedule.go
+│   │   └── testOnly/
+│   │       ├── CourseTestAPI.go # Test API handlers
+│   │       └── firestoreEmulator.go
+│   └── utils/
+│       └── logger.ts
+├── credentials/               # Firebase credentials (gitignored)
+│   └── firebase-credentials.json # Firebase service account
+├── go.mod                      # Go dependencies
+├── go.sum                      # Dependency checksums
+└── README.md
+```
 
 ## 🔒 Security Features
 
-- **Helmet**: Security headers
-- **CORS**: Cross-origin resource sharing
-- **Environment Validation**: Zod schema validation
-- **Request Logging**: Structured logging with Pino
+- **CORS**: Configurable cross-origin resource sharing
+- **Secure Headers**: Frame deny, XSS protection, content type sniffing prevention
+- **Input Validation**: Schema validation with regex checks for course times
 
-## 🚀 CI/CD
+## 🚀 Deployment
 
-### GitHub Actions
+### Local Development
 
-本專案使用 GitHub Actions 進行持續整合：
+```bash
+go run src/main.go
+```
 
-#### 基本 CI 工作流程 (`ci.yml`)
+### Docker Deployment
 
-- ✅ TypeScript 類型檢查
-- ✅ ESLint 代碼檢查
-- ✅ Prettier 格式檢查
-- ✅ 專案構建
-- ⏸️ 測試 (暫時停用，需要環境變數配置)
+```bash
+docker build -t xueer-backend .
+docker run -p 3000:3000 xueer-backend
+```
 
-#### 測試工作流程 (`test.yml`)
+### Cloud Run Deployment
 
-- 🔧 手動觸發或配置 Firebase 環境變數後啟用
-- 包含完整的 API 測試和覆蓋率報告
-- 需要設置 GitHub Secrets 或使用測試用環境變數
-
-#### 啟用完整測試
-
-1. **使用測試環境變數** (推薦用於開發)：
-   - 修改 `.github/workflows/test.yml`
-   - 取消註解 `push` 和 `pull_request` 觸發器
-
-2. **使用真實 Firebase 配置**：
-   - 在 GitHub Repository Settings > Secrets 中設置：
-     - `FIREBASE_PROJECT_ID`
-     - `FIREBASE_PRIVATE_KEY`
-     - `FIREBASE_CLIENT_EMAIL`
-     - 等其他必要變數
+1. Build and push to Google Container Registry
+2. Deploy to Cloud Run with Firebase service account
 
 ## 🤝 Contributing
 
@@ -211,7 +212,7 @@ To enable Realtime Database, uncomment the relevant lines in:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-The pre-commit hooks will automatically run linting and formatting checks.
+The pre-commit hooks will automatically run Go code quality checks (formatting, vetting, and dependency cleanup).
 
 ## 📄 License
 
